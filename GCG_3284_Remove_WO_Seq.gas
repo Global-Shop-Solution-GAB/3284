@@ -1,0 +1,550 @@
+Program.Sub.ScreenSU.Start
+gui.Form1..create
+gui.Form1..caption("Remove Sequences")
+gui.Form1..size(8820,6075)
+gui.Form1..minx(0)
+gui.Form1..miny(0)
+gui.Form1..position(0,0)
+gui.Form1..event(unload,Form1_Unload)
+gui.Form1..alwaysontop(False)
+gui.Form1..fontname("Arial")
+gui.Form1..fontsize(7)
+gui.Form1..forecolor(0)
+gui.Form1..fontstyle(,,,,)
+gui.Form1..BackColor(-2147483633)
+gui.Form1..controlbox(True)
+gui.Form1..maxbutton(False)
+gui.Form1..minbutton(False)
+gui.Form1..mousepointer(1)
+gui.Form1..moveable(True)
+gui.Form1..sizeable(False)
+gui.Form1..ShowInTaskBar(True)
+gui.Form1..titlebar(True)
+gui.Form1.fgSeq.create(gsflexgrid)
+gui.Form1.fgSeq.FixedRows(0)
+gui.Form1.fgSeq.FixedCols(0)
+gui.Form1.fgSeq.visible(True)
+gui.Form1.fgSeq.size(8280,4485)
+gui.Form1.fgSeq.zorder(0)
+gui.Form1.fgSeq.position(105,105)
+gui.Form1.fgSeq.enabled(True)
+gui.Form1.fgSeq.event(checkclick,fgseq_checkclick)
+gui.Form1.cmdDelMaterial.create(button)
+gui.Form1.cmdDelMaterial.caption("Remove All Material")
+gui.Form1.cmdDelMaterial.visible(True)
+gui.Form1.cmdDelMaterial.size(1185,510)
+gui.Form1.cmdDelMaterial.zorder(0)
+gui.Form1.cmdDelMaterial.position(4635,4755)
+gui.Form1.cmdDelMaterial.enabled(True)
+gui.Form1.cmdDelMaterial.fontname("Arial")
+gui.Form1.cmdDelMaterial.fontsize(8)
+gui.Form1.cmdDelMaterial.event(click,cmddelmaterial_click)
+gui.Form1.cmdDelMaterial.tooltip("Removes All Material Sequences")
+gui.Form1.cmdDelMaterial.defaultvalue("")
+gui.Form1.cmdDelMaterial.controlgroup(0)
+gui.Form1.cmdDelLabor.create(button)
+gui.Form1.cmdDelLabor.caption("Remove All Labor")
+gui.Form1.cmdDelLabor.visible(True)
+gui.Form1.cmdDelLabor.size(1185,510)
+gui.Form1.cmdDelLabor.zorder(0)
+gui.Form1.cmdDelLabor.position(5895,4755)
+gui.Form1.cmdDelLabor.enabled(True)
+gui.Form1.cmdDelLabor.fontname("Arial")
+gui.Form1.cmdDelLabor.fontsize(8)
+gui.Form1.cmdDelLabor.event(click,cmddellabor_click)
+gui.Form1.cmdDelLabor.tooltip("Removes All Labor Sequences")
+gui.Form1.cmdDelLabor.defaultvalue("")
+gui.Form1.cmdDelLabor.controlgroup(0)
+gui.Form1.cmdDeleteSel.create(button)
+gui.Form1.cmdDeleteSel.caption("Remove Selected")
+gui.Form1.cmdDeleteSel.visible(True)
+gui.Form1.cmdDeleteSel.size(1185,510)
+gui.Form1.cmdDeleteSel.zorder(0)
+gui.Form1.cmdDeleteSel.position(105,4755)
+gui.Form1.cmdDeleteSel.enabled(True)
+gui.Form1.cmdDeleteSel.fontname("Arial")
+gui.Form1.cmdDeleteSel.fontsize(8)
+gui.Form1.cmdDeleteSel.event(click,cmddeletesel_click)
+gui.Form1.cmdDeleteSel.tooltip("Removes All CHECKED Sequences")
+gui.Form1.cmdDeleteSel.defaultvalue("")
+gui.Form1.cmdDeleteSel.controlgroup(0)
+gui.Form1.cmdDelOutside.create(button)
+gui.Form1.cmdDelOutside.caption("Remove All Outside")
+gui.Form1.cmdDelOutside.visible(True)
+gui.Form1.cmdDelOutside.size(1230,510)
+gui.Form1.cmdDelOutside.zorder(0)
+gui.Form1.cmdDelOutside.position(7155,4755)
+gui.Form1.cmdDelOutside.enabled(True)
+gui.Form1.cmdDelOutside.fontname("Arial")
+gui.Form1.cmdDelOutside.fontsize(8)
+gui.Form1.cmdDelOutside.event(click,cmddeloutside_click)
+gui.Form1.cmdDelOutside.tooltip("Removes All Outside Sequences")
+gui.Form1.cmdDelOutside.defaultvalue("")
+gui.Form1.cmdDelOutside.controlgroup(0)
+gui.Form1.cmdDelMaterial.tabstop(True)
+gui.Form1.cmdDelMaterial.tabindex(1)
+gui.Form1.cmdDelLabor.tabstop(True)
+gui.Form1.cmdDelLabor.tabindex(2)
+gui.Form1.cmdDeleteSel.tabstop(True)
+gui.Form1.cmdDeleteSel.tabindex(12)
+gui.Form1.cmdDelOutside.tabstop(True)
+gui.Form1.cmdDelOutside.tabindex(22)
+
+
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+Variable.UDT.uGrid.Define("Checked",Long)
+Variable.UDT.uGrid.Define("Seq",String)
+Variable.UDT.uGrid.Define("Part",String)
+Variable.UDT.uGrid.Define("StdOper",String)
+Variable.UDT.uGrid.Define("UM",String)
+Variable.UDT.uGrid.Define("Description",String)
+Variable.UDT.uGrid.Define("Type",String)
+Variable.uGlobal.uGrid.Declare("uGrid")
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+F.ODBC.Connection!conX.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+
+Function.Intrinsic.Control.If(V.Caller.Hook,=,"16801")
+	V.uGlobal.uGrid.Redim(-1,-1)
+	'buildstyle
+	Function.Intrinsic.Control.CallSub(Buildstyle)
+	'load grid
+	Function.Intrinsic.Control.CallSub(Loadgrid)
+Function.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+Program.Sub.Main.End
+
+Program.Sub.Form1_Unload.Start
+F.Intrinsic.Control.SetErrorHandler("Form1_Unload_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+F.ODBC.connection!conX.Close
+F.Intrinsic.Control.End
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Form1_Unload_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	Function.Intrinsic.Control.End
+
+Function.Intrinsic.Control.EndIf
+Program.Sub.Form1_Unload.End
+
+program.sub.fgseq_checkclick.start
+F.Intrinsic.Control.SetErrorHandler("fgseq_checkclick_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+v.Local.sRet.Declare(String)
+v.Local.sT.Declare(String)
+v.Local.iC.Declare(Long)
+v.Local.iStatus.Declare(Long)
+
+Function.Intrinsic.Control.BlockEvents
+f.Intrinsic.Control.If(v.Args.column,=,0)
+	'get text matrix of the seq
+	gui.Form1.fgSeq.GetTextMatrix(1,v.Args.Key,v.Local.sT)
+	'get checked value
+	gui.Form1.fgSeq.GetTextMatrix(0,v.Args.Key,v.Local.iStatus)
+
+	f.Intrinsic.Control.If(v.Local.sT.Trim,<>,"")
+		f.Intrinsic.Variable.UDTMultiSeek(v.uGlobal.uGrid!Seq,v.Local.sT.Trim,v.Local.sRet)
+
+		Function.Intrinsic.Control.If(v.Local.sRet.Trim,<>,"")
+			f.Intrinsic.String.Split(v.Local.sRet,"*!*",v.Local.sRet)
+			'only mark the first one.
+			v.uGlobal.uGrid(v.Local.sRet(0))!Checked.Set(v.Local.iStatus)
+		Function.Intrinsic.Control.EndIf
+	Function.Intrinsic.Control.EndIf
+f.Intrinsic.Control.endif
+Function.Intrinsic.Control.UnBlockEvents
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("fgseq_checkclick_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	Function.Intrinsic.Control.CallSub(form1_unload)
+Function.Intrinsic.Control.EndIf
+program.sub.fgseq_checkclick.End
+
+program.sub.cmddeloutside_click.start
+F.Intrinsic.Control.SetErrorHandler("cmddeloutside_click_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+'remove all those that have a O in the TYPE window
+F.Intrinsic.Variable.UDTMultiUnFlag(V.uGlobal.uGrid!Type,"O")
+F.Intrinsic.Variable.UDTDeleteFlagged(V.uGlobal.uGrid)
+
+f.Intrinsic.Control.CallSub(writeback)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("cmddeloutside_click_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	Function.Intrinsic.Control.CallSub(form1_unload)
+Function.Intrinsic.Control.EndIf
+program.sub.cmddeloutside_click.End
+
+program.sub.cmddellabor_click.start
+F.Intrinsic.Control.SetErrorHandler("cmddellabor_click_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+f.Intrinsic.Control.BlockEvents
+
+'remove all those that have a L in the TYPE window
+F.Intrinsic.Variable.UDTMultiUnFlag(V.uGlobal.uGrid!Type,"L")
+F.Intrinsic.Variable.UDTDeleteFlagged(V.uGlobal.uGrid)
+
+f.Intrinsic.Control.CallSub(writeback)
+
+F.Intrinsic.Control.UnBlockEvents
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("cmddellabor_click_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	Function.Intrinsic.Control.CallSub(form1_unload)
+Function.Intrinsic.Control.EndIf
+program.sub.cmddellabor_click.End
+
+program.sub.cmddelmaterial_click.start
+F.Intrinsic.Control.SetErrorHandler("cmddelmaterial_click_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+'remove all those that have a M in the TYPE window
+F.Intrinsic.Variable.UDTMultiUnFlag(V.uGlobal.uGrid!Type,"M")
+F.Intrinsic.Variable.UDTDeleteFlagged(V.uGlobal.uGrid)
+
+f.Intrinsic.Control.CallSub(writeback)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("cmddelmaterial_click_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	f.Intrinsic.Control.CallSub(form1_unload)
+Function.Intrinsic.Control.EndIf
+program.sub.cmddelmaterial_click.End
+
+program.sub.cmddeletesel_click.start
+F.Intrinsic.Control.SetErrorHandler("cmddeletesel_click_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+Function.Intrinsic.Control.BlockEvents
+
+'we are going to flag all those that have a 1 in the checked field....
+F.Intrinsic.Variable.UDTMultiUnFlag(V.uGlobal.uGrid!Checked,1)
+F.Intrinsic.Variable.UDTDeleteFlagged(V.uGlobal.uGrid)
+
+'write back to our grid
+Function.Intrinsic.Control.CallSub(Writeback)
+
+F.Intrinsic.Control.UnBlockEvents
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("cmddeletesel_click_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	Function.Intrinsic.Control.CallSub(Form1_unload)
+Function.Intrinsic.Control.EndIf
+program.sub.cmddeletesel_click.End
+
+Program.Sub.LoadGrid.Start
+F.Intrinsic.Control.SetErrorHandler("LoadGrid_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+v.Local.iRows.Declare(Long)
+v.Local.iR.Declare(Long)
+v.Local.sRet.Declare(String)
+v.Local.iUB.Declare(Long)
+v.Local.sSQL.Declare(STring)
+v.Local.sJob.Declare(String)
+v.Local.sSuffix.Declare(String)
+'f.Intrinsic.Debug.ShowCallerInfo
+'
+F.Intrinsic.BDF.Load("AUX001","AUX001")
+F.Intrinsic.BDF.ReadRowCount("AUX001",v.Local.iRows)
+f.Intrinsic.Math.Sub(v.Local.iRows,1,v.Local.iRows)
+
+'if we are in open mode we need to make sure that we don't delete sequences that have charges.
+'now since this time hook 16801 does not give us the work order number. we have to find it.
+'currently at 12/22/15 it is stored in the x_lock_file based off of PID
+'open switch is 1.
+F.Intrinsic.Control.If(V.Caller.Switches,=,1)
+	'get our job and suffix information
+	F.Intrinsic.String.Build("Select Rec_Key From X_LOCK_FILE Where Company = '{0}' And Lock_Type = 'WO' AND PID = '{1}' And User_ID = '{2}'",V.Caller.CompanyCode,V.Caller.PID,V.Caller.User,V.Local.sSQL)
+	f.ODBC.Connection!conX.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+	f.Intrinsic.Control.If(V.ODBC.conX!rst.EOF,=,False)
+		F.Intrinsic.String.Split(v.ODBC.conX!rst.FieldValTrim!Rec_Key,"-",v.Local.sJob)
+		v.Local.sSuffix.Set(v.Local.sJob(1))
+	f.Intrinsic.Control.endif
+	f.ODBC.conx!rst.Close
+f.Intrinsic.Control.EndIf
+
+'f.Intrinsic.Math.Sub(v.Local.iRows,1,v.Local.iRows)
+'go through all, but we don't want misc seq or sequences that have charges against them.
+F.Intrinsic.Control.For(v.Local.iR,0,v.Local.iRows,1)
+	f.Intrinsic.BDF.ReadRow("AUX001",v.Local.iR,v.Local.sRet)
+	F.Intrinsic.Control.If(v.Local.sRet.Trim,<>,"")
+		f.Intrinsic.String.Split(v.Local.sRet,"|~|",v.Local.sRet)
+'		Function.Intrinsic.Control.If(v.Local.sRet(1).Trim,<>,"C")
+			F.Intrinsic.Control.If(v.Local.sRet(0),<,"995000")
+				'have to see if charges were done	
+				f.Intrinsic.Control.CallSub(checkcharges,"Job",v.Local.sJob(0).Trim,"Suffix",v.Local.sSuffix.Trim,"Seq",v.Local.sRet(0))
+
+				F.Intrinsic.Control.If(v.Args.Charges,=,False)
+
+					Function.Intrinsic.Control.If(V.uGlobal.uGrid.UBound,=,-1)
+						v.uGlobal.uGrid.Redim(0,0)
+						v.Local.iUB.Set(0)
+					Function.Intrinsic.Control.Else
+						f.Intrinsic.Math.Add(v.uGlobal.uGrid.UBound,1,v.Local.iUB)
+						v.uGlobal.uGrid.RedimPreserve(0,v.Local.iUB)
+					Function.Intrinsic.Control.EndIf
+					'checked will always be 1
+					v.uGlobal.uGrid(v.Local.iub)!Checked.Set(1)
+
+					'Seq
+					'pad this with leading zeroes since they don't pass it.... easier in the long run trust
+					f.Intrinsic.String.LPad(v.Local.sRet(0).Trim,"0",6,v.Local.sRet(0))
+					v.uGlobal.uGrid(v.Local.iUB)!Seq.set(v.Local.sRet(0))
+					'Type
+					v.uGlobal.uGrid(v.Local.iUB)!Type.Set(v.Local.sret(1))
+					'Part/WorkCenter
+					v.uGlobal.ugrid(V.Local.iUB)!Part.Set(v.Local.sret(2))
+					'Std Op
+					v.uGlobal.uGrid(v.Local.iUB)!StdOper.Set(v.Local.sRet(3))
+					v.uGlobal.uGrid(v.Local.iUB)!UM.Set(v.Local.sRet(4))
+					v.uGlobal.uGrid(v.Local.iUB)!Description.Set(v.Local.sRet(5))
+				f.Intrinsic.Control.endif
+			Function.Intrinsic.Control.Else
+				'can we assume that we are done loading...
+				f.Intrinsic.Control.ExitFor(v.Local.iR)
+			Function.Intrinsic.Control.EndIf
+		'Function.Intrinsic.Control.EndIf
+	Function.Intrinsic.Control.EndIf
+F.Intrinsic.Control.Next(v.Local.iR)
+
+Function.Intrinsic.Control.If(V.uGlobal.uGrid.UBound,>,-1)
+	'load udt to grid
+	gui.Form1.fgSeq.LoadFromUDT("v.uglobal.uGrid","CHECKED*!*SEQ*!*TYPE*!*Part*!*STDOPER*!*UM*!*DESCRIPTION",2)
+
+	Gui.Form1..Show
+	'flag all
+	f.Intrinsic.Variable.UDTFlagAll(V.uGlobal.uGrid)
+Function.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("LoadGrid_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	Function.Intrinsic.Control.CallSub(form1_unload)
+Function.Intrinsic.Control.EndIf
+Program.Sub.LoadGrid.End
+
+Program.Sub.Buildstyle.Start
+F.Intrinsic.Control.SetErrorHandler("Buildstyle_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+V.Local.iC.Declare(Long)
+
+'7 Columns
+'checkbox
+'Seq
+'Type
+'Part/Work Center
+'Std Oper
+'UM
+'Description
+
+Gui.Form1.fgSeq.Cols(7)
+Gui.Form1.fgSeq.Rows(1)
+Gui.Form1.fgSeq.Rows(2)
+Gui.Form1.fgSeq.FixedRows(1)
+
+Gui.Form1.fgSeq.RowHeight(0,500)
+
+
+Gui.Form1.fgSeq.SetColumnPercentages(".05:.08:.08:.27:.08:.08:.35")
+F.Intrinsic.Control.For(v.Local.iC,0,6,1)
+	F.Intrinsic.Control.If(v.Local.ic,=,0)
+		'checkbox column
+		Gui.Form1.fgSeq.BuildStyle(1,v.Local.ic,"Fontstyle","Bold",True)
+		Gui.Form1.fgSeq.BuildStyle(1,v.Local.ic,"Type","locked",True)
+		Gui.Form1.fgSeq.BuildStyle(1,v.Local.ic,"Format","Alignment",4)
+		Gui.Form1.fgSeq.BuildStyle(2,v.Local.ic,"Type","Checkbox",)
+	Function.Intrinsic.Control.Else
+		Gui.Form1.fgSeq.BuildStyle(1,v.Local.ic,"Fontstyle","Bold",True)
+		Gui.Form1.fgSeq.BuildStyle(1,v.Local.ic,"Type","locked",True)
+		Gui.Form1.fgSeq.BuildStyle(1,v.Local.ic,"Format","Alignment",4)
+		Gui.Form1.fgSeq.BuildStyle(2,v.Local.ic,"Type","locked",True)
+		Gui.Form1.fgSeq.BuildStyle(2,v.Local.ic,"Format","Alignment",2)
+	Function.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.Next(v.Local.iC)
+
+'seq need to be padded to six
+Gui.Form1.fgSeq.BuildStyle(2,1,"Format","Mask","000000")
+
+Gui.Form1.fgSeq.TextMatrix(1,0,"Seq")
+Gui.Form1.fgSeq.TextMatrix(2,0,"Type")
+Gui.Form1.fgSeq.TextMatrix(3,0,"Part/Work Center")
+Gui.Form1.fgSeq.TextMatrix(4,0,"Std Oper")
+Gui.Form1.fgSeq.TextMatrix(5,0,"UM")
+Gui.Form1.fgSeq.TextMatrix(6,0,"Description")
+
+Gui.Form1.fgSeq.ApplyStyle(0,1)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Buildstyle_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	Function.Intrinsic.Control.CallSub(Form1_unload)
+Function.Intrinsic.Control.EndIf
+Program.Sub.Buildstyle.End
+
+Program.Sub.WriteBack.Start
+F.Intrinsic.Control.SetErrorHandler("WriteBack_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+v.Local.ic.Declare(Long)
+v.Local.iR.Declare(Long)
+v.Local.iRows.Declare(Long)
+v.Local.sRow.Declare(STring)
+v.Local.sT.Declare(String)
+v.Local.sRet.Declare(String)
+v.Local.iUb.Declare(Long)
+
+'this going  to be fun... totally forget about how we have to delete rows in bdfs...dang....
+
+'now we should already have the bdf in memory so lets try
+F.Intrinsic.BDF.Clone("AUX001","CLONE")
+F.Intrinsic.BDF.ReadRowCount("AUX001",v.Local.iRows)
+f.Intrinsic.Math.Sub(v.Local.iRows,1,v.Local.irows)
+
+F.Intrinsic.Control.For(v.Local.iR,0,v.Local.iRows,1)
+	F.Intrinsic.BDF.ReadRow("AUX001",v.Local.iR,v.Local.sRow)
+	F.Intrinsic.String.Split(v.Local.sRow,"|~|",v.Local.sRow)
+	v.Local.iUb.Set(v.Local.sRow.UBound)
+	'if it's a misc seq we want to leave that mess and not mess.
+	'if it's not a misc
+	'seq and it's a normal seq we do it.
+	F.Intrinsic.Control.If(v.Local.sRow(0).Trim,<,"995000")
+		f.Intrinsic.String.LPad(v.Local.sRow(0),"0",6,v.Local.sT)
+		f.Intrinsic.Variable.UDTMultiSeek(v.uGlobal.uGrid!Seq,v.Local.sT,v.Local.sRet)
+		f.Intrinsic.Control.If(v.Local.sRet.Trim,<>,"")
+			'means its in our UDT so that means we shall remove this record.
+			v.Local.sRow.Redim(-1,-1)
+			'that should clear it.
+			'redim it back to normal
+			v.Local.sRow.Redim(0,v.Local.iUb)
+		Function.Intrinsic.Control.EndIf
+	Function.Intrinsic.Control.EndIf
+
+	'join it back
+	F.Intrinsic.String.Join(v.Local.sRow,"|~|",v.Local.sRow)
+
+	'write row back
+	F.Intrinsic.BDF.WriteRow("CLONE",v.Local.sRow)
+F.Intrinsic.Control.Next(v.Local.iR)
+
+F.Intrinsic.BDF.Save("CLONE","AUX001")
+
+Function.Intrinsic.Control.CallSub(form1_unload)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("WriteBack_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	Function.Intrinsic.Control.CallSub(form1_unload)
+Function.Intrinsic.Control.EndIf
+Program.Sub.WriteBack.End
+
+Program.Sub.CheckCharges.Start
+F.Intrinsic.Control.SetErrorHandler("CheckCharges_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+V.Local.sSQl.Declare(String)
+V.Local.sSeq.Declare(String)
+V.Local.bCharges.Declare(Boolean)
+
+F.Intrinsic.String.LPad(V.Args.Seq.Trim,"0",6,V.Local.sSeq)
+
+F.Intrinsic.Control.if(V.Caller.Switches,=,1)
+	F.Intrinsic.String.Build("Select LMO,Seq,Sum(Hours_Worked) As Hours, Sum(Pieces_Compltd) As Pieces  From V_JOB_DETAIL WHERE Job = '{0}' And Suffix = '{1}' And Seq = '{2}' Group By LMO,SEQ",V.Args.Job.trim,V.Args.Suffix.trim,V.Local.sSeq.Trim,V.Local.sSQl)
+	F.ODBC.Connection!conX.OpenLocalRecordsetRO("rst",V.Local.sSQl)
+	F.Intrinsic.Control.If(V.ODBC.conX!rst.EOF,=,True)
+		V.Local.bCharges.Set(False)
+	F.Intrinsic.Control.Else
+		F.Intrinsic.Control.If(V.ODBC.conX!rst.Fieldval!Hours,>,0)
+			V.Local.bCharges.Set(True)
+		F.Intrinsic.Control.ElseIf(V.ODBC.conX!rst.FieldVal!Pieces,>,0)
+			V.Local.bCharges.Set(True)
+		F.Intrinsic.Control.Else
+			V.Local.bCharges.Set(False)
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.endif
+F.Intrinsic.Control.Else
+	V.Local.bCharges.Set(False)
+F.Intrinsic.Control.endif
+
+F.Intrinsic.Variable.AddRV("Charges",V.Local.bCharges)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("CheckCharges_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3284_Remove_WO_Seq.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Form1_unload)
+Function.Intrinsic.Control.EndIf
+Program.Sub.CheckCharges.End
+
+Program.Sub.Comments.Start
+${$0$}$$}$$}$12:00:00 AM$}$False
+Program.Sub.Comments.End
